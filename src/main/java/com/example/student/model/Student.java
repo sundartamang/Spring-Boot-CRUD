@@ -34,59 +34,60 @@ public class Student {
     public Student() {
     }
 
-    public Student(Long id, String name, String email, LocalDate dob, byte[] photo) {
-        this.id = id;
+    public Student(String name, String email, LocalDate dob, String photo) {
         this.name = name;
         this.email = email;
         this.dob = dob;
-        this.photo = photo != null ? this.convertImageToBase64(photo) : null;
+        this.photo = photo;
     }
 
-    public void setId(Long id){
-        this.id = id;
+    public Student(String name, String email, LocalDate dob) {
+        this.name = name;
+        this.email = email;
+        this.dob = dob;
     }
 
     public Long getId(){
         return id;
     }
 
-    public void setName(String name){
-        this.name = name;
+    public void setId(Long id){
+        this.id = id;
     }
 
     public String getName(){
         return name;
     }
 
+    public void setName(String name){
+        this.name = name;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
     public void setEmail(String email){
         this.email = email;
     }
-
-    public String getEmail(){
-        return  email;
+    public LocalDate getDob(){
+        return dob;
     }
 
     public void setDob(LocalDate dob){
         this.dob = dob;
     }
 
-    public LocalDate getDob(){
-        return dob;
+    public String getPhoto() {
+        return photo;
     }
 
-    public byte[] getPhoto() {
-        return Base64.getDecoder().decode(photo);
-    }
-
-    public void setPhoto(byte[] photo) {
-        this.photo = this.convertImageToBase64(photo);
+    public void setPhoto(String photo) {
+        this.photo = photo;
     }
 
     public Integer getAge(){
         return Period.between(this.dob, LocalDate.now()).getYears();
     }
 
-    private String convertImageToBase64(byte[] photo){
-        return Base64.getEncoder().encodeToString(photo);
-    }
 }
