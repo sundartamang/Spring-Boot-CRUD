@@ -24,13 +24,29 @@ public class StudentController {
     }
 
     /**
-     * gets a list of all students
-     * @return List of student with status 200
+     * Retrieve students with pagination, sorting, and search capability.
+     * @param name student name
+     * @param email student email
+     * @param page page number
+     * @param size total size per page
+     * @param sortField sort field name
+     * @param sortDirection direction of sorting, either "asc" or "desc" (default is "asc")
+     * @return list of students with status 200
      */
     @GetMapping
-    public ResponseEntity<List<Student>> getAllStudents() {
-        List<Student> students = this.studentService.getStudentList();
-        return new ResponseEntity<>(students, HttpStatus.OK);
+    public ResponseEntity<List<Student>> getAllStudents(
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String email,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "name") String sortField,
+            @RequestParam(defaultValue = "asc") String sortDirection
+    ) {
+        var studentsPage = studentService.getStudentsBasedOnFilters(name, email, page, size, sortField, sortDirection);
+        if (studentsPage.isEmpty()) {
+            return ResponseEntity.ok(List.of());
+        }
+        return ResponseEntity.ok(studentsPage.getContent());
     }
 
     /**

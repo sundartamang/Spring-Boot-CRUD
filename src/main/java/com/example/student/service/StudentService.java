@@ -3,6 +3,10 @@ package com.example.student.service;
 import com.example.student.model.Student;
 import com.example.student.repository.StudentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
@@ -89,6 +93,26 @@ public class StudentService {
             throw new IllegalStateException(getStudentNotFoundMessage(studentId));
         }
         studentRepository.deleteById(studentId);
+    }
+
+    /**
+     * searches for students by name or email with pagination and sorting.
+     * @param name the name to filter by (optional)
+     * @param email the email to filter by (optional)
+     * @param page the page number (0-indexed)
+     * @param size the number of records per page
+     * @param sortField the field to sort by
+     * @param sortDirection the direction of sorting (asc/desc)
+     * @return a paginated and sorted list of students
+     */
+    public Page<Student> getStudentsBasedOnFilters(String name, String email, int page, int size, String sortField, String sortDirection) {
+        Sort sort = Sort.by(Sort.Direction.fromString(sortDirection), sortField);
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        if (name != null && email != null) {
+            return studentRepository.findByNameContainingIgnoreCaseOrEmailContainingIgnoreCase(name, email, pageable);
+        }
+        return studentRepository.findAll(pageable);
     }
 
     /**
