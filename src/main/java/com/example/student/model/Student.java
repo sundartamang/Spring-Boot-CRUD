@@ -2,7 +2,7 @@ package com.example.student.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Past;
 import java.time.LocalDate;
 
@@ -11,18 +11,26 @@ import java.time.LocalDate;
 public class Student {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @SequenceGenerator(
+            name = "sequence_student",
+            sequenceName = "sequence_student",
+            allocationSize = 1
+    )
+    @GeneratedValue(
+            strategy = GenerationType.SEQUENCE,
+            generator = "sequence_student"
+    )
     private Long id;
 
-    @NotEmpty(message = "Name is required")
+    @NotNull(message = "Name is required")
     private String name;
 
     @Email(message = "Email should be valid")
-    @NotEmpty(message = "Email is required")
+    @NotNull(message = "Email is required")
     @Column(unique = true)
     private String email;
 
-    @NotEmpty(message = "Date of birth is required")
+    @NotNull(message = "Date of birth is required")
     @Past(message = "Date of birth must be in the past")
     private LocalDate dob;
 

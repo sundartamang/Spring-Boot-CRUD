@@ -8,8 +8,8 @@ import java.util.List;
 
 public interface IStudentService {
     List<Student> getAllStudents();
-    Student getStudentById(Integer id);
-    void deleteStudentById(Integer id);
-    Student SaveStudent(Student student, MultipartFile file) throws IOException;
+    Student getStudentById(Long studentId);
+    void deleteStudentById(Long StudentId);
+    Student saveStudent(Student student, MultipartFile file) throws IOException;
     Student updateStudentById(Long studentId, Student student, MultipartFile file) throws IOException;
 }
