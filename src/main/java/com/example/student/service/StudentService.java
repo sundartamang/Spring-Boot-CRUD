@@ -3,6 +3,8 @@ package com.example.student.service;
 import com.example.student.dto.FilterStudentRequest;
 import com.example.student.model.Student;
 import com.example.student.repository.StudentRepository;
+import jakarta.transaction.Transactional;
+import jakarta.validation.ValidationException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -37,6 +39,7 @@ public class StudentService implements IStudentService {
                 () -> new IllegalStateException(getStudentNotFoundMessage(studentId)));
     }
 
+    @Transactional
     @Override
     public void deleteStudentById(Long studentId) {
         boolean exists = studentRepository.existsById(studentId);
@@ -47,32 +50,36 @@ public class StudentService implements IStudentService {
         }
     }
 
+    @Transactional
     @Override
     public Student saveStudent(Student student, MultipartFile image) throws IOException {
-        String email = student.getEmail();
         validateInputField(student);
+        verifyEmailNotTaken(student);
 
-        verifyEmailNotTaken(email);
         if (image != null && !image.isEmpty()) {
             saveImageAndFilePath(student, image);
         }
         return studentRepository.save(student);
     }
 
+    @Transactional
     @Override
     public Student updateStudentById(Long studentId, Student student, MultipartFile image) throws IOException {
         Student existingStudent = studentRepository.findById(studentId).orElseThrow(
                 () -> new IllegalStateException(getStudentNotFoundMessage(studentId)));
-        String email = student.getEmail();
         String name = student.getName();
         LocalDate dob = student.getDob();
+        String email = student.getEmail();
 
         validateInputField(student);
-
-        verifyEmailNotTaken(email);
+        verifyEmailNotTaken(student);
 
         if (name != null && !name.equals(existingStudent.getName())) {
             existingStudent.setName(name);
+        }
+
+        if (email != null && !email.equals(existingStudent.getEmail())) {
+            existingStudent.setEmail(email);
         }
 
         if (dob != null && !dob.equals(existingStudent.getDob())) {
@@ -103,6 +110,9 @@ public class StudentService implements IStudentService {
         }
     }
 
+
+    // --- Helper Methods ---
+
     private Pageable getPageable(FilterStudentRequest filterStudentRequest){
         if (filterStudentRequest == null) {
             return getDefaultPageable();
@@ -132,7 +142,7 @@ public class StudentService implements IStudentService {
     }
 
     private void handleInvalidException(String inputFieldName) {
-        throw new IllegalStateException(String.format("The field '%s' is required", inputFieldName));
+        throw new ValidationException(String.format("The field '%s' is required", inputFieldName));
     }
 
     private void saveImageAndFilePath(Student student, MultipartFile image) throws IOException {
@@ -157,28 +167,15 @@ public class StudentService implements IStudentService {
         }
     }
 
-    private void verifyEmailNotTaken(String email) {
+    private void verifyEmailNotTaken(Student student) {
+        String email = student.getEmail();
         if (studentRepository.existsByEmail(email)) {
-            throw new IllegalStateException("Email already taken");
+            throw new ValidationException("Email already taken");
         }
     }
 
     private String getStudentNotFoundMessage(Long studentId) {
         return String.format("Student with ID %d not found",studentId);
-    }
-
-    private Sort.Direction getSortDirection(String sortOrder) {
-        return (sortOrder != null && sortOrder.equalsIgnoreCase("asc"))
-                ? Sort.Direction.ASC
-                : Sort.Direction.DESC;
-    }
-
-    private Pageable getDefaultPageable() {
-        return PageRequest.of(0, 10, Sort.unsorted());
-    }
-
-    private boolean isNotEmpty(String value) {
-        return value != null && !value.trim().isEmpty();
     }
 
     private List<Student> searchByNameAndEmail(String name, String email, Pageable pageable) {
@@ -196,5 +193,19 @@ public class StudentService implements IStudentService {
 
     private List<Student> findAllStudents(Pageable pageable) {
         return studentRepository.findAll(pageable).getContent();
+    }
+
+    private Sort.Direction getSortDirection(String sortOrder) {
+        return (sortOrder != null && sortOrder.equalsIgnoreCase("asc"))
+                ? Sort.Direction.ASC
+                : Sort.Direction.DESC;
+    }
+
+    private Pageable getDefaultPageable() {
+        return PageRequest.of(0, 10, Sort.unsorted());
+    }
+
+    private boolean isNotEmpty(String value) {
+        return value != null && !value.trim().isEmpty();
     }
 }
