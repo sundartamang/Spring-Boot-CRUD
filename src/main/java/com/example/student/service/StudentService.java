@@ -2,7 +2,6 @@ package com.example.student.service;
 
 import com.example.student.model.Student;
 import com.example.student.repository.StudentRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -45,8 +44,12 @@ public class StudentService implements IStudentService {
     @Override
     public Student saveStudent(Student student, MultipartFile image) throws IOException {
         String email = student.getEmail();
+        validateInputField(student);
+
         verifyEmailNotTaken(email);
-        saveImageAndFilePath(student, image);
+        if (image != null && !image.isEmpty()) {
+            saveImageAndFilePath(student, image);
+        }
         return studentRepository.save(student);
     }
 
@@ -56,6 +59,8 @@ public class StudentService implements IStudentService {
         String email = student.getEmail();
         String name = student.getName();
         LocalDate dob = student.getDob();
+
+        validateInputField(student);
 
         verifyEmailNotTaken(email);
 
@@ -74,6 +79,17 @@ public class StudentService implements IStudentService {
         return studentRepository.save(existingStudent);
     }
 
+    private void validateInputField(Student student) {
+        if (student.getEmail() == null || student.getEmail().isEmpty()) {
+            handleInvalidException("email");
+        }
+        if (student.getName() == null || student.getName().isEmpty()) {
+            handleInvalidException("name");
+        }
+        if (student.getDob() == null) {
+            handleInvalidException("Date of birth");
+        }
+    }
 
     private void saveImageAndFilePath(Student student, MultipartFile image) throws IOException {
         if (!image.isEmpty()) {
@@ -105,5 +121,9 @@ public class StudentService implements IStudentService {
 
     private String getStudentNotFoundMessage(Long studentId) {
         return String.format("Student with ID %d not found",studentId);
+    }
+
+    private void handleInvalidException(String inputFieldName) {
+        throw new IllegalStateException(String.format("The field '%s' is required", inputFieldName));
     }
 }

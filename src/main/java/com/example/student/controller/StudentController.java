@@ -35,7 +35,7 @@ public class StudentController {
     @PostMapping
     public ResponseEntity<String> addNewStudent(
             @ModelAttribute("student") Student student,
-            @RequestPart("image") MultipartFile image) throws IOException {
+            @RequestPart(value = "image", required = false) MultipartFile image) throws IOException {
         studentService.saveStudent(student, image);
         return ResponseEntity.status(HttpStatus.CREATED).body("Student added successfully");
     }
@@ -50,7 +50,7 @@ public class StudentController {
     public ResponseEntity<Student> updateStudent(
             @PathVariable("studentId") Long studentId,
             @ModelAttribute("student") Student student,
-            @RequestPart("image") MultipartFile image) throws  IOException {
+            @RequestPart(value = "image", required = false) MultipartFile image) throws  IOException {
         studentService.updateStudentById(studentId, student, image);
         return ResponseEntity.status(HttpStatus.OK).body(student);
     }
