@@ -1,5 +1,6 @@
 package com.example.student.controller;
 
+import com.example.student.dto.FilterStudentRequest;
 import com.example.student.model.Student;
 import com.example.student.service.StudentService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,8 +23,8 @@ public class StudentController {
     }
 
     @GetMapping
-    public List<Student> getAllStudents() {
-        return studentService.getAllStudents();
+    public List<Student> getAllStudents(@RequestBody(required = false) FilterStudentRequest filterStudentRequest) {
+        return studentService.getAllStudents(filterStudentRequest);
     }
 
     @GetMapping("/{studentId}")
@@ -55,5 +56,8 @@ public class StudentController {
         return ResponseEntity.status(HttpStatus.OK).body(student);
     }
 
-
+    @PostMapping("/search")
+    public List<Student> searchStudents(@RequestBody FilterStudentRequest filterStudentRequest) {
+        return studentService.searchStudents(filterStudentRequest);
+    }
 }
