@@ -5,6 +5,7 @@ import com.example.student.model.Student;
 import com.example.student.repository.StudentRepository;
 import jakarta.transaction.Transactional;
 import jakarta.validation.ValidationException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -23,6 +24,7 @@ public class StudentService implements IStudentService {
     private final String uploadDir = "src/main/resources/static/upload/";
     private final StudentRepository studentRepository;
 
+    @Autowired
     StudentService(StudentRepository studentRepository) {
         this.studentRepository = studentRepository;
     }
